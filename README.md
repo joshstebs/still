@@ -26,7 +26,7 @@ No AI provider is called. Notes and tasks are private and stay in the D1 workspa
 
 Use the Sites installation/build helpers. `npm run db:generate` produces schema migrations. Hosted migration application is managed by Sites publication.
 
-Run `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`. `npm test` covers recurring-task date math plus database, authorization, validation, and conflict checks against a real local D1 instance. GitHub Actions runs the full suite on Ubuntu. Browser authentication callbacks require a hosted signed-in session and are not covered by these tests.
+Run `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`. `npm test` covers recurring-task date math, offline cold-start/reconnect conflict detection, auth boundaries, plus database, authorization, validation, and conflict checks against a real local D1 instance. GitHub Actions runs the full suite on Ubuntu. Browser authentication callbacks require a hosted signed-in session and are not covered by these tests.
 
 ### Android/Termux limitation
 `workerd` has no Android/arm64 build, so `npm ci`, Miniflare/D1 tests, and the Vinext production build cannot run natively on Termux. Install JS packages with `npm ci --ignore-scripts` to run lint, typecheck, and pure unit tests; use Linux CI or a hosted environment for the D1 and build checks.
