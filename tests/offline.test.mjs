@@ -63,7 +63,7 @@ test('cold offline start reopens the last account workspace and loads the shell'
   assert.equal(window.STILL_CLOUD.remote.user.name, 'Test User');
   assert.equal(window.STILL_CLOUD.remote.revision, 7);
   assert.equal(window.STILL_CLOUD.base, 'BASE');
-  assert.deepEqual(loaded, ['/recurrence.js?v=4', '/app.js?v=4', '/expand.js?v=4', '/cloud-sync.js?v=4']);
+  assert.deepEqual(loaded, ['/recurrence.js?v=5', '/app.js?v=4', '/expand.js?v=4', '/cloud-sync.js?v=4']);
   assert.equal(elements.has('#cloudLoading'), false);
   assert.equal(sws(), true);
 });
