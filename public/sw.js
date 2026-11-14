@@ -1,6 +1,6 @@
 'use strict';
-const CACHE = 'still-shell-v4';
-const SHELL = ['/style.css?v=4', '/recurrence.js?v=4', '/app.js?v=4', '/expand.js?v=4', '/cloud-sync.js?v=4', '/cloud-bootstrap.js?v=4'];
+const CACHE = 'still-shell-v5';
+const SHELL = ['/style.css?v=4', '/recurrence.js?v=5', '/app.js?v=4', '/expand.js?v=4', '/cloud-sync.js?v=4', '/cloud-bootstrap.js?v=4'];
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
