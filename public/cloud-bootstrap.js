@@ -5,7 +5,7 @@
  const canonical=s=>JSON.stringify({version:1,tasks:s.tasks||[],notes:s.notes||[],sessions:s.sessions||[],duration:s.duration||25,projects:s.projects||[],habits:s.habits||[],trash:s.trash||[],draft:s.draft||''});
  window.stillCanonical=canonical;
  async function loadScripts(){
-  for(const src of ['/recurrence.js?v=4','/app.js?v=4','/expand.js?v=4','/cloud-sync.js?v=4'])await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.onload=resolve;script.onerror=reject;document.body.append(script)});
+  for(const src of ['/recurrence.js?v=5','/app.js?v=4','/expand.js?v=4','/cloud-sync.js?v=4'])await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.onload=resolve;script.onerror=reject;document.body.append(script)});
  }
  function ready(){
   const loading=document.querySelector('#cloudLoading');if(loading)loading.remove();

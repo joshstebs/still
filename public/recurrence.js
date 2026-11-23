@@ -23,9 +23,16 @@
     if (!['daily', 'weekly', 'monthly'].includes(repeat)) return '';
     const today = parse(from) || parse(iso(new Date()));
     const start = parse(due);
-    let next = advance(start || today, repeat);
+    if (!start) return iso(advance(today, repeat));
     // Preserve the original weekday or day-of-month when a task is completed late.
-    for (let guard = 0; start && next <= today && guard < 1000; guard++) next = advance(next, repeat);
+    // Monthly steps are always computed from the original due date so a short
+    // month (e.g. Feb 28) does not permanently pull the day-of-month earlier.
+    let steps = 1;
+    let next = repeat === 'monthly' ? addMonths(start, steps) : advance(start, repeat);
+    for (let guard = 0; next <= today && guard < 1000; guard++) {
+      steps += 1;
+      next = repeat === 'monthly' ? addMonths(start, steps) : advance(next, repeat);
+    }
     return iso(next);
   }
   root.stillNextOccurrence = nextOccurrence;
