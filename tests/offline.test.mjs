@@ -13,10 +13,12 @@ function harness({fetchImpl, store = {}}) {
   let swRegistered = false;
   const loadingMessage = {textContent: 'Connecting to your private workspace…', after() {}};
   const elements = new Map([['#cloudLoading', {remove() { elements.delete('#cloudLoading'); }}]]);
+  let signOut;
   const document = {
     querySelector(selector) {
       if (selector === '#cloudLoading') return elements.get('#cloudLoading');
       if (selector === '#loadingMessage') return loadingMessage;
+      if (selector.startsWith('a[href')) return {addEventListener: (_type, callback) => { signOut = callback; }};
       return null;
     },
     createElement(tag) {
@@ -30,7 +32,8 @@ function harness({fetchImpl, store = {}}) {
     window,
     localStorage: {
       getItem: key => values.has(key) ? values.get(key) : null,
-      setItem: (key, value) => values.set(key, String(value))
+      setItem: (key, value) => values.set(key, String(value)),
+      removeItem: key => values.delete(key)
     },
     fetch: fetchImpl,
     AbortSignal: {timeout: () => ({})},
@@ -42,7 +45,7 @@ function harness({fetchImpl, store = {}}) {
     clearTimeout
   });
   vm.runInContext(source, context);
-  return {window, values, loaded, location, loadingMessage, elements, sws: () => swRegistered};
+  return {window, values, loaded, location, loadingMessage, elements, sws: () => swRegistered, signOut: () => signOut()};
 }
 
 const settle = () => new Promise(resolve => setTimeout(resolve, 30));
@@ -89,12 +92,14 @@ test('online start records the account and detects a device conflict without rep
 });
 
 test('signed-out responses redirect instead of exposing local data', async () => {
-  const {window, loaded, location, elements} = harness({
+  const {window, loaded, location, elements, values} = harness({
     fetchImpl: async () => ({status: 401, ok: false, json: async () => ({})}),
     store: {[`${KEY}:last-account`]: 'acct-1', [`${KEY}:acct-1`]: JSON.stringify(workspace)}
   });
   await settle();
   assert.equal(location.href, '/signin-with-chatgpt?return_to=%2F');
+  assert.equal(values.has(`${KEY}:last-account`), false);
+  assert.equal(values.has(`${KEY}:acct-1`), true);
   assert.equal(loaded.length, 0);
   assert.equal(window.STILL_CLOUD, undefined);
   assert.equal(elements.has('#cloudLoading'), true);
@@ -109,4 +114,16 @@ test('offline start without a local copy shows a retry state and loads no worksp
   assert.equal(window.STILL_CLOUD, undefined);
   assert.equal(loaded.length, 0);
   assert.equal(location.href, '');
+});
+
+test('signing out forgets the offline identity and preserves the saved workspace', async () => {
+  const {signOut, values} = harness({
+    fetchImpl: async () => ({status: 200, ok: true, json: async () => ({user: {id: 'acct-1', name: 'Test User', email: 'test@example.test'}, state: workspace, revision: 7})})
+  });
+  await settle();
+  assert.equal(values.get(`${KEY}:last-account`), 'acct-1');
+  signOut();
+  assert.equal(values.has(`${KEY}:last-account`), false);
+  assert.equal(values.has(`${KEY}:last-user`), false);
+  assert.equal(values.has(`${KEY}:acct-1`), true);
 });

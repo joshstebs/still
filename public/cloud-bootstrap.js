@@ -4,6 +4,13 @@
  const LAST_ACCOUNT=KEY+':last-account',LAST_USER=KEY+':last-user';
  const canonical=s=>JSON.stringify({version:1,tasks:s.tasks||[],notes:s.notes||[],sessions:s.sessions||[],duration:s.duration||25,projects:s.projects||[],habits:s.habits||[],trash:s.trash||[],draft:s.draft||''});
  window.stillCanonical=canonical;
+ function forgetOfflineAccount(){
+  try{
+   localStorage.removeItem(LAST_ACCOUNT);
+   localStorage.removeItem(LAST_USER);
+  }catch{}
+ }
+ document.querySelector('a[href^="/signout-with-chatgpt"]')?.addEventListener('click',forgetOfflineAccount);
  async function loadScripts(){
   for(const src of ['/recurrence.js?v=5','/app.js?v=4','/expand.js?v=4','/cloud-sync.js?v=4'])await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.onload=resolve;script.onerror=reject;document.body.append(script)});
  }
@@ -33,7 +40,7 @@
   let remote;
   try{
    const response=await fetch('/api/workspace',{credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(15000)});
-   if(response.status===401){location.href='/signin-with-chatgpt?return_to=%2F';return}
+   if(response.status===401){forgetOfflineAccount();location.href='/signin-with-chatgpt?return_to=%2F';return}
    if(!response.ok)throw Error('Cloud storage is unavailable. Your saved data is untouched.');
    remote=await response.json();
   }catch(error){

@@ -1,6 +1,6 @@
 'use strict';
-const CACHE = 'still-shell-v5';
-const SHELL = ['/style.css?v=4', '/recurrence.js?v=5', '/app.js?v=4', '/expand.js?v=4', '/cloud-sync.js?v=4', '/cloud-bootstrap.js?v=4'];
+const CACHE = 'still-shell-v6';
+const SHELL = ['/style.css?v=4', '/recurrence.js?v=5', '/app.js?v=4', '/expand.js?v=4', '/cloud-sync.js?v=4', '/cloud-bootstrap.js?v=5'];
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
@@ -14,7 +14,7 @@ self.addEventListener('install', event => {
 });
 self.addEventListener('activate', event => {
   event.waitUntil(caches.keys()
-    .then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key))))
+    .then(keys => Promise.all(keys.filter(key => key.startsWith('still-shell-') && key !== CACHE).map(key => caches.delete(key))))
     .then(() => self.clients.claim()));
 });
 self.addEventListener('fetch', event => {
@@ -24,7 +24,7 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
   // Never cache workspace data or any API response.
   if (url.pathname.startsWith('/api/')) return;
-  if (request.mode === 'navigate') {
+  if (request.mode === 'navigate' && url.pathname === '/' && !url.search) {
     event.respondWith((async () => {
       try {
         const response = await fetch(request);
